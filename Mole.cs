@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,8 +15,13 @@ namespace Whack_a_mole
         Texture2D knockoutTex;
         Texture2D currentTex;
         Vector2 pos;
+        public Vector2 ogPos;
+        public Vector2 highestPoint;
         int yVelocity;
-        Rectangle hitBox;
+        const int popDistance = 150;
+        double timeSpentHigh;
+        const double timeAllowedHigh = 1;
+        public Rectangle hitBox;
         bool isActive = false;
 
         public Mole(Texture2D tex, Vector2 pos, int yVelocity, Texture2D knockoutTex)
@@ -27,16 +32,50 @@ namespace Whack_a_mole
             this.knockoutTex = knockoutTex;
 
             currentTex = tex;
+            ogPos = pos;
+            
+            highestPoint = new Vector2((ogPos.X - popDistance), (ogPos.Y - popDistance));
 
-            hitBox = new Rectangle((int)pos.X, (int)pos.Y, 100, 100);
+            hitBox = new Rectangle((int)pos.X + tex.Width / 2, (int)pos.Y + tex.Height / 6, 100, 150);
         }
 
-        public void Update() // kan skicka med en speed och gameTime i update
+        public void Update(GameTime gameTime) // kan skicka med en speed och gameTime i update
         {
-            pos.Y = pos.Y + yVelocity;
-           
-            hitBox.Y += yVelocity;
+                        
+            pos.Y -= yVelocity;
+            hitBox.Y -= yVelocity;
+            
+            if (pos.Y <= highestPoint.Y)
+            {
+                yVelocity = 0;
+                timeSpentHigh += gameTime.ElapsedGameTime.TotalSeconds;
+                if (timeSpentHigh >= timeAllowedHigh)
+                {
+                    yVelocity = -5;
+                    timeSpentHigh = 0;
+                    isActive = false;
+                    // lives--;
+                }
+            }
+            if (pos.Y >= ogPos.Y && isActive == false)
+            {
+                yVelocity = 0;
+                pos = ogPos;
+                SetTexture(tex);
+                
+            }
+           /* if (pos.Y > ogPos.Y - popDistance && isActive == false)
+            {
+                pos.Y += 10;
+                hitBox.Y += 10;
+            } */
+            
+            
+        }
 
+        public void ResetPosition()
+        {
+            pos = ogPos;
         }
 
         public bool IsActive()
@@ -44,30 +83,31 @@ namespace Whack_a_mole
             return isActive;
         }
 
-        public void Activate()
+        public void Activate(int velocity)
         {
-            
+            yVelocity = velocity;
             isActive = true;
         }
 
         public void Deactivate()
         {
-
             
             isActive = false;
         }
 
-        public void ChangeTexture()
+        public void SetTexture(Texture2D tex)
         {
-            if (currentTex == knockoutTex)
-            {
-                currentTex = tex;
-            }
-            else if (currentTex == tex)
-            {
-                currentTex = knockoutTex;
-            }
-            
+            currentTex = tex;
+        }
+
+        public void SetVelocity(int v)
+        {
+            yVelocity = v;
+        }
+
+        public Vector2 GetPos()
+        {
+            return pos;
         }
 
         public void Draw(SpriteBatch sb)
