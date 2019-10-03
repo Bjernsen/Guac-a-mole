@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +19,7 @@ namespace Whack_a_mole
             this.tex = tex;
             this.pos = pos;
         }
+
 
         public void Draw(SpriteBatch sb)
         {
